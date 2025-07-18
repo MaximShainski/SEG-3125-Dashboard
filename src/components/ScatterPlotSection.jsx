@@ -81,8 +81,8 @@ const ScatterPlotSection = ({
     };
 
     return (
-        <div className="bg-green-50 p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-green-700 mb-4 text-center">{t.scatterPlotTitle}</h2>
+        <div className="bg-blue-50 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold text-blue-700 mb-4 text-center">{t.scatterPlotTitle}</h2>
             <div className="mb-4">
                 <label htmlFor="model-search" className="font-medium text-gray-700 block mb-2">{t.selectModels}:</label>
                 
@@ -96,7 +96,7 @@ const ScatterPlotSection = ({
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onFocus={() => setIsSearchFocused(true)}
                         // Remove the onBlur handler completely
-                        className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out mb-2"
+                        className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out mb-2"
                     />
                     
                     {/* Display search results */}
@@ -105,14 +105,14 @@ const ScatterPlotSection = ({
                             {searchResults.map(d => (
                                 <div
                                     key={d.model}
-                                    className={`flex items-center p-1 cursor-pointer hover:bg-gray-100 rounded-md ${selectedLineModels.includes(d.model) ? 'bg-green-100 font-semibold' : ''}`}
+                                    className={`flex items-center p-1 cursor-pointer hover:bg-gray-100 rounded-md ${selectedLineModels.includes(d.model) ? 'bg-blue-100 font-semibold' : ''}`}
                                     onClick={() => handleModelSelection(d.model)}
                                 >
                                     <input
                                         type="checkbox"
                                         checked={selectedLineModels.includes(d.model)}
                                         readOnly
-                                        className="form-checkbox h-4 w-4 text-green-600 rounded focus:ring-green-500"
+                                        className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
                                     />
                                     <span className="ml-2 text-sm text-gray-700">
                                         {d.brand} {d.model} <span className="text-gray-500 text-xs">({t.clickToAdd})</span>
@@ -135,11 +135,11 @@ const ScatterPlotSection = ({
                             {selectedLineModels.map(modelName => {
                                 const modelData = evData.find(d => d.model === modelName);
                                 return (
-                                    <span key={modelName} className="flex items-center bg-green-200 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                                    <span key={modelName} className="flex items-center bg-blue-200 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
                                         {modelData ? `${modelData.brand} ${modelData.model}` : modelName}
                                         <button
                                             onClick={() => handleModelSelection(modelName)}
-                                            className="ml-1 text-green-800 hover:text-green-900 focus:outline-none"
+                                            className="ml-1 text-blue-800 hover:text-blue-900 focus:outline-none"
                                         >
                                             &times;
                                         </button>
