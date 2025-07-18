@@ -1,123 +1,125 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    LineChart, Line, ScatterChart, Scatter // Added ScatterChart and Scatter
+} from 'recharts';
 
-import LineChartSection from './components/LineChartSection';
+import ScatterPlotSection from './components/ScatterPlotSection';
 import CustomTooltip from './components/CustomTooltip';
 import LanguageAndUnitSelectors from './components/LanguageAndUnitSelectors';
+import LineChartSection from './components/LineChartSection';
 import BarChartSection from './components/BarChartSection';
-
-// --- Data and Constants (Could be in a separate 'data.js' or 'constants.js' file) ---
-
-// Mock Data for Electric Vehicles
-const initialEVData = [
-    { brand: 'Tesla', model: 'Model 3', top_speed_kmh: 225, battery_capacity_kWh: 75, battery_type: 'Li-ion', number_of_cells: 4416, torque_nm: 527, efficiency_wh_per_km: 150, range_km: 560, acceleration_0_100_s: 3.3 },
-    { brand: 'Tesla', model: 'Model S', top_speed_kmh: 250, battery_capacity_kWh: 100, battery_type: 'Li-ion', number_of_cells: 7920, torque_nm: 750, efficiency_wh_per_km: 165, range_km: 650, acceleration_0_100_s: 2.5 },
-    { brand: 'Porsche', model: 'Taycan', top_speed_kmh: 260, battery_capacity_kWh: 93.4, battery_type: 'Li-ion', number_of_cells: 396, torque_nm: 850, efficiency_wh_per_km: 200, range_km: 450, acceleration_0_100_s: 2.8 },
-    { brand: 'Hyundai', model: 'Kona Electric', top_speed_kmh: 167, battery_capacity_kWh: 64, battery_type: 'Li-ion', number_of_cells: 294, torque_nm: 395, efficiency_wh_per_km: 147, range_km: 484, acceleration_0_100_s: 7.6 },
-    { brand: 'Nissan', model: 'Leaf', top_speed_kmh: 157, battery_capacity_kWh: 62, battery_type: 'Li-ion', number_of_cells: 288, torque_nm: 340, efficiency_wh_per_km: 170, range_km: 385, acceleration_0_100_s: 6.9 },
-    { brand: 'BMW', model: 'i4', top_speed_kmh: 200, battery_capacity_kWh: 83.9, battery_type: 'Li-ion', number_of_cells: 360, torque_nm: 430, efficiency_wh_per_km: 175, range_km: 590, acceleration_0_100_s: 5.7 },
-    { brand: 'Audi', model: 'e-tron GT', top_speed_kmh: 245, battery_capacity_kWh: 93.4, battery_type: 'Li-ion', number_of_cells: 396, torque_nm: 630, efficiency_wh_per_km: 205, range_km: 470, acceleration_0_100_s: 4.1 },
-    { brand: 'Ford', model: 'Mustang Mach-E', top_speed_kmh: 180, battery_capacity_kWh: 91, battery_type: 'Li-ion', number_of_cells: 376, torque_nm: 580, efficiency_wh_per_km: 180, range_km: 490, acceleration_0_100_s: 4.8 },
-    { brand: 'Chevrolet', model: 'Bolt EV', top_speed_kmh: 145, battery_capacity_kWh: 65, battery_type: 'Li-ion', number_of_cells: 288, torque_nm: 360, efficiency_wh_per_km: 160, range_km: 417, acceleration_0_100_s: 6.5 },
-    { brand: 'Volkswagen', model: 'ID.4', top_speed_kmh: 160, battery_capacity_kWh: 77, battery_type: 'Li-ion', number_of_cells: 288, torque_nm: 310, efficiency_wh_per_km: 170, range_km: 450, acceleration_0_100_s: 8.5 },
-    { brand: 'Kia', model: 'EV6', top_speed_kmh: 185, battery_capacity_kWh: 77.4, battery_type: 'Li-ion', number_of_cells: 384, torque_nm: 605, efficiency_wh_per_km: 168, range_km: 528, acceleration_0_100_s: 5.2 },
-    { brand: 'Polestar', model: 'Polestar 2', top_speed_kmh: 205, battery_capacity_kWh: 78, battery_type: 'Li-ion', number_of_cells: 324, torque_nm: 660, efficiency_wh_per_km: 185, range_km: 480, acceleration_0_100_s: 4.7 },
-];
-
-// Translation content for English and French
-const translations = {
-    en: {
-        dashboardTitle: "Electric Vehicle Performance Dashboard",
-        dashboardDescription: "Explore key specifications of various electric vehicles, including range, acceleration, and battery capacity. Use the filters and language selector to customize your view.",
-        language: "Language",
-        english: "English",
-        french: "French",
-        selectMetric: "Select Metric",
-        rangeKm: "Range (km)",
-        rangeMiles: "Range (miles)",
-        topSpeedKmH: "Top Speed (km/h)",
-        topSpeedMph: "Top Speed (mph)",
-        accelerationS: "Acceleration (0-100 km/h in s)",
-        batteryCapacityKWh: "Battery Capacity (kWh)",
-        efficiencyWhPerKm: "Efficiency (Wh/km)",
-        torqueNm: "Torque (Nm)",
-        selectUnit: "Select Unit System",
-        metric: "Metric",
-        imperial: "Imperial",
-        barChartTitle: "Top EV Models by Metric",
-        lineChartTitle: "Range vs. Battery Capacity for Selected Models",
-        selectModels: "Select Models for Line Chart",
-        model: "Model",
-        batteryCapacity: "Battery Capacity",
-        range: "Range",
-        brand: "Brand",
-        modelName: "Model Name",
-        value: "Value",
-        noDataSelected: "No data selected for the line chart. Please select models.",
-        selectBrandFilter: "Filter by Brand",
-        allBrands: "All Brands",
-        selectedModels: "Selected Models"
-    },
-    fr: {
-        dashboardTitle: "Tableau de bord des performances des véhicules électriques",
-        dashboardDescription: "Explorez les spécifications clés de divers véhicules électriques, y compris l'autonomie, l'accélération et la capacité de la batterie. Utilisez les filtres et le sélecteur de langue pour personnaliser votre affichage.",
-        language: "Langue",
-        english: "Anglais",
-        french: "Français",
-        selectMetric: "Sélectionner la métrique",
-        rangeKm: "Autonomie (km)",
-        rangeMiles: "Autonomie (miles)",
-        topSpeedKmH: "Vitesse Max (km/h)",
-        topSpeedMph: "Vitesse Max (mph)",
-        accelerationS: "Accélération (0-100 km/h en s)",
-        batteryCapacityKWh: "Capacité Batterie (kWh)",
-        efficiencyWhPerKm: "Efficacité (Wh/km)",
-        torqueNm: "Couple (Nm)",
-        selectUnit: "Sélectionner le système d'unités",
-        metric: "Métrique",
-        imperial: "Impérial",
-        barChartTitle: "Meilleurs Modèles de VE par Métrique",
-        lineChartTitle: "Autonomie vs. Capacité Batterie pour les Modèles Sélectionnés",
-        selectModels: "Sélectionner des Modèles pour le Graphique Linéaire",
-        model: "Modèle",
-        batteryCapacity: "Capacité Batterie",
-        range: "Autonomie",
-        brand: "Marque",
-        modelName: "Nom du Modèle",
-        value: "Valeur",
-        noDataSelected: "Aucune donnée sélectionnée pour le graphique linéaire. Veuillez sélectionner des modèles.",
-        selectBrandFilter: "Filtrer par Marque",
-        allBrands: "Toutes les Marques",
-        selectedModels: "Modèles Sélectionnés"
-    }
-};
-
-// Conversion factors
-const KM_TO_MILES = 0.621371;
-const KMH_TO_MPH = 0.621371;
+import {translations, KM_TO_MILES, KMH_TO_MPH, KG_TO_LBS, L_TO_CU_FT, MM_TO_INCH, NM_TO_LB_FT, ACCEL_100KMH_TO_60MPH_FACTOR} from './constants';
 
 const App = () => {
+    // State for the actual EV data, fetched from CSV
+    const [evData, setEvData] = useState([]);
+    // State for loading status
+    const [loading, setLoading] = useState(true);
+    // State for error status
+    const [error, setError] = useState(null);
+
     // State for current language (default to English)
     const [language, setLanguage] = useState('en');
     // State for unit system (default to Metric)
     const [unitSystem, setUnitSystem] = useState('metric');
     // State for the selected metric in the Bar Chart
-    const [selectedBarMetric, setSelectedBarMetric] = useState('range_km');
-    // State for selected models in the Line Chart
+    const [selectedBarMetric, setSelectedBarMetric] = useState('fast_charging_power_kw_dc');
+    // State for selected models in the Scatter Plot
     const [selectedLineModels, setSelectedLineModels] = useState([]);
-    // State for brand filter in Bar Chart
-    const [selectedBrandFilter, setSelectedBrandFilter] = useState('All');
 
     // Get translations based on current language
     const t = translations[language];
 
+    // Function to parse CSV string into an array of objects
+    const parseCSV = useCallback((csvString) => {
+        const lines = csvString.trim().split('\n');
+        const headers = lines[0].split(',').map(header => header.trim());
+        const data = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const currentLine = lines[i].split(',');
+            if (currentLine.length === headers.length) {
+                const row = {};
+                headers.forEach((header, index) => {
+                    let value = currentLine[index].trim();
+                    // Attempt to convert known numerical fields to numbers
+                    switch (header) {
+                        case 'top_speed_kmh':
+                        case 'battery_capacity_kWh':
+                        case 'number_of_cells':
+                        case 'torque_nm':
+                        case 'efficiency_wh_per_km':
+                        case 'range_km':
+                        case 'acceleration_0_100_s':
+                        case 'fast_charging_power_kw_dc':
+                        case 'towing_capacity_kg':
+                        case 'cargo_volume_l':
+                        case 'seats':
+                        case 'length_mm':
+                        case 'width_mm':
+                        case 'height_mm':
+                            row[header] = value !== '' ? parseFloat(value) : null;
+                            break;
+                        default:
+                            row[header] = value;
+                    }
+                });
+                data.push(row);
+            }
+        }
+        return data;
+    }, []);
+
+    // Effect to fetch and parse CSV data
+    useEffect(() => {
+        const fetchEVData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('/ev_specs.csv'); // Path to your CSV in the public folder
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                let parsedData = parseCSV(csvText);
+
+                setEvData(parsedData);
+                setError(null);
+            } catch (e) {
+                console.error("Failed to fetch or parse CSV:", e);
+                setError(t.errorLoadingData);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEVData();
+    }, [parseCSV, t.errorLoadingData]); // Re-run if parseCSV or error message changes
+
     // Function to convert values based on unit system
     const convertValue = useCallback((key, value) => {
+        if (value === null || value === undefined) return value; // Handle null/undefined values gracefully
+
         if (unitSystem === 'imperial') {
             switch (key) {
                 case 'range_km':
                     return parseFloat((value * KM_TO_MILES).toFixed(1));
                 case 'top_speed_kmh':
                     return parseFloat((value * KMH_TO_MPH).toFixed(1));
+                case 'towing_capacity_kg':
+                    return parseFloat((value * KG_TO_LBS).toFixed(1));
+                case 'cargo_volume_l':
+                    return parseFloat((value * L_TO_CU_FT).toFixed(1));
+                case 'length_mm':
+                case 'width_mm':
+                case 'height_mm':
+                    return parseFloat((value * MM_TO_INCH).toFixed(1));
+                case 'torque_nm': // New: Torque conversion
+                    return parseFloat((value * NM_TO_LB_FT).toFixed(1));
+                case 'efficiency_wh_per_km': // New: Efficiency conversion
+                    return parseFloat((value * WH_PER_KM_TO_WH_PER_MILE).toFixed(1));
+                case 'acceleration_0_100_s': // New: Acceleration conversion
+                    return parseFloat((value * ACCEL_100KMH_TO_60MPH_FACTOR).toFixed(1));
                 default:
                     return value;
             }
@@ -125,12 +127,15 @@ const App = () => {
         return value;
     }, [unitSystem]);
 
-    // Handle model selection for Line Chart
+    // Handle model selection for Scatter Plot
     const handleModelSelection = useCallback((model) => {
-        setSelectedLineModels(prev =>
-            prev.includes(model) ? prev.filter(m => m !== model) : [...prev, model]
-        );
-    }, []); // Empty dependency array means this function is created once
+        setSelectedLineModels(prev => {
+            if (Array.isArray(model)) { // Allows clearing all selected models
+                return [];
+            }
+            return prev.includes(model) ? prev.filter(m => m !== model) : [...prev, model];
+        });
+    }, []);
 
     // Determine the label for the Y-axis of the Bar Chart based on selected metric and unit system
     const getBarYAxisLabel = useCallback(() => {
@@ -140,17 +145,47 @@ const App = () => {
             case 'top_speed_kmh':
                 return unitSystem === 'metric' ? t.topSpeedKmH : t.topSpeedMph;
             case 'acceleration_0_100_s':
-                return t.accelerationS;
+                return unitSystem === 'metric' ? t.accelerationS : t.accelerationMph;
             case 'battery_capacity_kWh':
                 return t.batteryCapacityKWh;
             case 'efficiency_wh_per_km':
-                return t.efficiencyWhPerKm;
+                return unitSystem === 'metric' ? t.efficiencyWhPerKm : t.efficiencyWhPerMile;
             case 'torque_nm':
-                return t.torqueNm;
+                return unitSystem === 'metric' ? t.torqueNm : t.torqueLbFt;
+            case 'fast_charging_power_kw_dc':
+                return t.fastChargingPowerKwDc;
+            case 'towing_capacity_kg':
+                return unitSystem === 'metric' ? t.towingCapacityKg : `${t.towingCapacityKg.replace('(kg)', '(lbs)')}`;
+            case 'cargo_volume_l':
+                return unitSystem === 'metric' ? t.cargoVolumeL : `${t.cargoVolumeL.replace('(L)', '(cu ft)')}`;
+            case 'seats':
+                return t.seats;
+            case 'length_mm':
+                return unitSystem === 'metric' ? t.lengthMm : `${t.lengthMm.replace('(mm)', '(inches)')}`;
+            case 'width_mm':
+                return unitSystem === 'metric' ? t.widthMm : `${t.widthMm.replace('(mm)', '(inches)')}`;
+            case 'height_mm':
+                return unitSystem === 'metric' ? t.heightMm : `${t.heightMm.replace('(mm)', '(inches)')}`;
             default:
                 return '';
         }
     }, [selectedBarMetric, unitSystem, t]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                <p className="text-xl font-semibold text-blue-700">{t.loadingData}</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 to-red-200">
+                <p className="text-xl font-semibold text-red-700">{error}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 font-inter text-gray-800">
@@ -171,30 +206,28 @@ const App = () => {
                 </header>
 
                 {/* Charts Section */}
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <section className="grid grid-cols-1 gap-8">
                     {/* Bar Chart Component */}
                     <BarChartSection
-                        initialEVData={initialEVData}
+                        evData={evData} // Pass fetched data
                         selectedBarMetric={selectedBarMetric}
                         setSelectedBarMetric={setSelectedBarMetric}
-                        selectedBrandFilter={selectedBrandFilter}
-                        setSelectedBrandFilter={setSelectedBrandFilter}
                         unitSystem={unitSystem}
                         convertValue={convertValue}
                         getBarYAxisLabel={getBarYAxisLabel}
                         t={t}
-                        CustomTooltip={CustomTooltip} // Pass CustomTooltip as a prop
+                        CustomTooltip={CustomTooltip}
                     />
 
-                    {/* Line Chart Component */}
-                    <LineChartSection
-                        initialEVData={initialEVData}
+                    {/* Scatter Plot Component */}
+                    <ScatterPlotSection
+                        evData={evData} // Pass fetched data
                         selectedLineModels={selectedLineModels}
                         handleModelSelection={handleModelSelection}
                         unitSystem={unitSystem}
                         convertValue={convertValue}
                         t={t}
-                        CustomTooltip={CustomTooltip} // Pass CustomTooltip as a prop
+                        CustomTooltip={CustomTooltip}
                     />
                 </section>
             </div>
