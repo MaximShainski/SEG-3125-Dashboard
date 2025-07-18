@@ -64,7 +64,7 @@ export const translations = {
         topSpeedKmH: "Vitesse Max (km/h)",
         topSpeedMph: "Vitesse Max (mph)",
         accelerationS: "Accélération (0-100 km/h en s)",
-        accelerationMph: "Accélération (0-96 km/h en s)", // French imperial acceleration label
+        accelerationMph: "Accélération (0-60 mph en s)", // French imperial acceleration label
         batteryCapacityKWh: "Capacité Batterie (kWh)",
         efficiencyWhPerKm: "Efficacité (Wh/km)",
         efficiencyWhPerMile: "Efficacité (Wh/mile)", // French imperial efficiency label

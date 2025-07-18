@@ -71,10 +71,10 @@ const BarChartSection = ({
                         <option value="fast_charging_power_kw_dc">{t.fastChargingPowerKwDc}</option>
                         <option value="range_km">{unitSystem === 'metric' ? t.rangeKm : t.rangeMiles}</option>
                         <option value="top_speed_kmh">{unitSystem === 'metric' ? t.topSpeedKmH : t.topSpeedMph}</option>
-                        <option value="acceleration_0_100_s">{unitSystem === 'metric' ? t.accelerationS : t.accelerationMph}</option> {/* Updated label */}
+                        <option value="acceleration_0_100_s">{unitSystem === 'metric' ? t.accelerationS : t.accelerationMph}</option>
                         <option value="battery_capacity_kWh">{t.batteryCapacityKWh}</option>
-                        <option value="efficiency_wh_per_km">{unitSystem === 'metric' ? t.efficiencyWhPerKm : t.efficiencyWhPerMile}</option> {/* Updated label */}
-                        <option value="torque_nm">{unitSystem === 'metric' ? t.torqueNm : t.torqueLbFt}</option> {/* Updated label */}
+                        <option value="efficiency_wh_per_km">{unitSystem === 'metric' ? t.efficiencyWhPerKm : t.efficiencyWhPerMile}</option>
+                        <option value="torque_nm">{unitSystem === 'metric' ? t.torqueNm : t.torqueLbFt}</option>
                         <option value="towing_capacity_kg">{unitSystem === 'metric' ? t.towingCapacityKg : `${t.towingCapacityKg.replace('(kg)', '(lbs)')}`}</option>
                         <option value="cargo_volume_l">{unitSystem === 'metric' ? t.cargoVolumeL : `${t.cargoVolumeL.replace('(L)', '(cu ft)')}`}</option>
                         <option value="seats">{t.seats}</option>
@@ -96,16 +96,26 @@ const BarChartSection = ({
                         textAnchor="end"
                         height={100}
                         interval={0}
-                        tick={{ fontSize: 10, fill: '#555' }}
+                        tick={{ fontSize: 15, fill: '#555' }}
                     />
                     <YAxis
-                        label={{ value: getBarYAxisLabel(), angle: -90, position: 'insideLeft', fill: '#555' }}
+                        label={<text
+                            x={-150}
+                            y={30} // depends on your chart height
+                            transform="rotate(-90)"
+                            textAnchor="middle"
+                            fill="#3b82f6"
+                            fontSize={14}
+                            fontWeight="bold"
+                            >
+                            {getBarYAxisLabel()}
+                            </text>}
                         tick={{ fill: '#555' }}
                     />
                     {/* Pass selectedBarMetric and convertValue to CustomTooltip */}
                     <Tooltip content={<CustomTooltip unitSystem={unitSystem} t={t} convertValue={convertValue} selectedBarMetric={selectedBarMetric} />} />
                     <Legend />
-                    <Bar dataKey="value" fill="#3b82f6" name={getBarYAxisLabel()} radius={[10, 10, 0, 0]} />
+                    <Bar dataKey="value" fill="#3b82f6" name={t.brand} radius={[10, 10, 0, 0]} />
                 </BarChart>
             </ResponsiveContainer>
         </div>

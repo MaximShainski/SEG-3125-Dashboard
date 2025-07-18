@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react'; // Added useState, useEffect
+import React, { useState, useEffect, useRef } from 'react'; // Added useRef
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {drivetrainColors } from '../constants';
-// Assuming drivetrainColors are imported or defined globally
-// const drivetrainColors = { ... };
 
 const ScatterPlotSection = ({
     evData, selectedLineModels, handleModelSelection, unitSystem,
@@ -10,86 +8,123 @@ const ScatterPlotSection = ({
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    
+    // Add ref for the search container
+    const searchContainerRef = useRef(null);
 
     // Effect to update search results based on search term
     useEffect(() => {
-        if (searchTerm.length > 1) { // Only search if more than 1 character
+        if (searchTerm.length === 0) {
+            if (isSearchFocused) {
+                setSearchResults(evData);
+            } else {
+                setSearchResults([]);
+            }
+        } else if (searchTerm.length >= 1) {
             const filtered = evData.filter(d =>
                 d.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 d.brand.toLowerCase().includes(searchTerm.toLowerCase())
             );
             setSearchResults(filtered);
-        } else {
-            setSearchResults([]); // Clear results if search term is too short
         }
-    }, [searchTerm, evData]);
+    }, [searchTerm, evData, isSearchFocused]);
+
+    // Handle clicks outside the search area
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setIsSearchFocused(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Data for scatter plot, including drivetrain for coloring
     const scatterPlotData = evData
         .filter(d => selectedLineModels.includes(d.model))
         .map(d => ({
             model: d.model,
-            brand: d.brand, // Pass brand for tooltip
-            batteryCapacity: d.battery_capacity_kWh, // X-axis
-            efficiency: convertValue('efficiency_wh_per_km', d.efficiency_wh_per_km), // Y-axis
-            range: convertValue('range_km', d.range_km), // For dot size
-            drivetrain: d.drivetrain || 'Other', // Ensure drivetrain exists for coloring
+            brand: d.brand,
+            batteryCapacity: d.battery_capacity_kWh,
+            efficiency: convertValue('efficiency_wh_per_km', d.efficiency_wh_per_km),
+            range: convertValue('range_km', d.range_km),
+            drivetrain: d.drivetrain || 'Other',
         }));
 
-    // Custom dot component for scatter plot to apply drivetrain colors and size by range
+    // Custom dot component for scatter plot
     const renderDot = (props) => {
         const { cx, cy, payload } = props;
         const color = drivetrainColors[payload.drivetrain] || drivetrainColors['Other'];
-        // Scale range to a reasonable dot size (e.g., 50km range = 5px radius, 500km range = 15px radius)
-        // Ensure minimum radius to make small points visible
-        const radius = Math.max(5, Math.min(20, payload.range / (unitSystem === 'metric' ? 30 : 20))); // Adjust scaling factor as needed
+        const radius = Math.max(5, Math.min(20, payload.range / (unitSystem === 'metric' ? 30 : 20)));
         return (
             <circle cx={cx} cy={cy} r={radius} fill={color} stroke="#fff" strokeWidth={1.5} />
         );
     };
 
-    // Prepare legend data for drivetrains
     const drivetrainLegendData = Object.keys(drivetrainColors).map(key => ({
-        value: t[key.toLowerCase()] || key, // Translate drivetrain names
+        value: t[key.toLowerCase()] || key,
         type: 'circle',
         color: drivetrainColors[key]
     }));
+
+    const xAxisTickFormatter = (value) => {
+        return value === 0 ? '0' : `${value} kWh`;
+    };
+
+    const yAxisTickFormatter = (value) => {
+        return value === 0 ? '0' : `${value} Wh/km`;
+    };
 
     return (
         <div className="bg-green-50 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-green-700 mb-4 text-center">{t.scatterPlotTitle}</h2>
             <div className="mb-4">
                 <label htmlFor="model-search" className="font-medium text-gray-700 block mb-2">{t.selectModels}:</label>
-                <input
-                    type="text"
-                    id="model-search"
-                    placeholder={t.searchModels}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out mb-2"
-                />
-                {searchTerm.length > 1 && searchResults.length > 0 && (
-                    <div className="max-h-40 overflow-y-auto p-2 border border-gray-300 rounded-md bg-white mb-2">
-                        {searchResults.map(d => (
-                            <div
-                                key={d.model}
-                                className={`flex items-center p-1 cursor-pointer hover:bg-gray-100 rounded-md ${selectedLineModels.includes(d.model) ? 'bg-green-100 font-semibold' : ''}`}
-                                onClick={() => handleModelSelection(d.model)}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedLineModels.includes(d.model)}
-                                    readOnly // Checkbox is controlled by onClick of div
-                                    className="form-checkbox h-4 w-4 text-green-600 rounded focus:ring-green-500"
-                                />
-                                <span className="ml-2 text-sm text-gray-700">
-                                    {d.brand} {d.model} <span className="text-gray-500 text-xs">({t.clickToAdd})</span>
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {searchTerm.length > 1 && searchResults.length === 0 && (
+                
+                {/* Wrap search input and results in a container with ref */}
+                <div ref={searchContainerRef} className="relative">
+                    <input
+                        type="text"
+                        id="model-search"
+                        placeholder={t.searchModels}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onFocus={() => setIsSearchFocused(true)}
+                        // Remove the onBlur handler completely
+                        className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out mb-2"
+                    />
+                    
+                    {/* Display search results */}
+                    {(isSearchFocused || searchTerm.length > 0) && searchResults.length > 0 && (
+                        <div className="max-h-40 overflow-y-auto p-2 border border-gray-300 rounded-md bg-white mb-2 absolute z-10 w-full shadow-lg">
+                            {searchResults.map(d => (
+                                <div
+                                    key={d.model}
+                                    className={`flex items-center p-1 cursor-pointer hover:bg-gray-100 rounded-md ${selectedLineModels.includes(d.model) ? 'bg-green-100 font-semibold' : ''}`}
+                                    onClick={() => handleModelSelection(d.model)}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedLineModels.includes(d.model)}
+                                        readOnly
+                                        className="form-checkbox h-4 w-4 text-green-600 rounded focus:ring-green-500"
+                                    />
+                                    <span className="ml-2 text-sm text-gray-700">
+                                        {d.brand} {d.model} <span className="text-gray-500 text-xs">({t.clickToAdd})</span>
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                {/* Display "No models found" only if search term is not empty and no results */}
+                {searchTerm.length > 0 && searchResults.length === 0 && (
                     <p className="text-sm text-gray-500 mb-2">{t.noModelsFound}</p>
                 )}
 
@@ -113,7 +148,7 @@ const ScatterPlotSection = ({
                             })}
                         </div>
                         <button
-                            onClick={() => handleModelSelection([])} // Clear all
+                            onClick={() => handleModelSelection([])}
                             className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-md shadow-sm transition duration-150 ease-in-out"
                         >
                             {t.clearSelection}
@@ -121,31 +156,39 @@ const ScatterPlotSection = ({
                     </div>
                 )}
             </div>
+            
             {scatterPlotData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={400}>
-                    <ScatterChart
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
+                    <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                         <XAxis
                             type="number"
                             dataKey="batteryCapacity"
                             name={t.batteryCapacity}
-                            unit=" kWh"
-                            label={{ value: t.batteryCapacityKWh, position: 'bottom', offset: 0, fill: '#555' }}
                             tick={{ fill: '#555' }}
+                            tickFormatter={xAxisTickFormatter}
                         />
                         <YAxis
                             type="number"
                             dataKey="efficiency"
                             name={t.efficiencyWhPerKm}
-                            unit=" Wh/km"
-                            label={{ value: t.efficiencyWhPerKm, angle: -90, position: 'insideLeft', fill: '#555' }}
+                            label={<text
+                                x={-150}
+                                y={10}
+                                transform="rotate(-90)"
+                                textAnchor="middle"
+                                fill="#555"
+                                fontSize={14}
+                                fontWeight="bold"
+                                >
+                                {t.efficiencyWhPerKm}
+                            </text>}
                             tick={{ fill: '#555' }}
+                            tickFormatter={yAxisTickFormatter}
                         />
                         <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CustomTooltip unitSystem={unitSystem} t={t} convertValue={convertValue} />} />
                         <Legend payload={drivetrainLegendData} />
-                        <Scatter name={t.selectedModels} data={scatterPlotData} dot={renderDot} />
+                        <Scatter name={t.batteryCapacityKWh} data={scatterPlotData} dot={renderDot} />
                     </ScatterChart>
                 </ResponsiveContainer>
             ) : (
@@ -157,4 +200,4 @@ const ScatterPlotSection = ({
     );
 };
 
-export default ScatterPlotSection
+export default ScatterPlotSection;
