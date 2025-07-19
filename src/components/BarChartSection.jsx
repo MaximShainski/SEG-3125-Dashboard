@@ -1,4 +1,4 @@
-import  { useCallback } from 'react';
+import React, { useCallback } from 'react'; // Added useCallback
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ALL_NUMERIC_METRICS} from '../constants';
 const BarChartSection = ({
@@ -40,7 +40,8 @@ const BarChartSection = ({
                     result[m] = group.count[m] > 0 ? parseFloat((group.sum[m] / group.count[m]).toFixed(1)) : null;
                 });
                 // Set the 'value' property for the currently selected bar metric (for chart rendering)
-                result.value = result[currentMetric];
+                // Apply unit conversion here before setting the value
+                result.value = convertValue(currentMetric, result[currentMetric]);
                 return result;
             })
             .sort((a, b) => {
@@ -50,7 +51,7 @@ const BarChartSection = ({
                 }
                 return b.value - a.value;
             });
-    }, [convertValue]); // Dependency on convertValue for consistency
+    }, [convertValue, unitSystem]); // Added unitSystem to dependencies for useCallback
 
     // Bar chart data now always aggregates by brand
     const barChartData = aggregateDataByBrand(evData, selectedBarMetric);
@@ -78,9 +79,9 @@ const BarChartSection = ({
                         <option value="towing_capacity_kg">{unitSystem === 'metric' ? t.towingCapacityKg : `${t.towingCapacityKg.replace('(kg)', '(lbs)')}`}</option>
                         <option value="cargo_volume_l">{unitSystem === 'metric' ? t.cargoVolumeL : `${t.cargoVolumeL.replace('(L)', '(cu ft)')}`}</option>
                         <option value="seats">{t.seats}</option>
-                        <option value="length_mm">{unitSystem === 'metric' ? t.lengthMm : t.lengthInches}</option>
-                        <option value="width_mm">{unitSystem === 'metric' ? t.widthMm : t.widthInches}</option>
-                        <option value="height_mm">{unitSystem === 'metric' ? t.heightMm : t.heightInches}</option>
+                        <option value="length_mm">{unitSystem === 'metric' ? t.lengthMm : t.lengthInches}</option> {/* Updated to use translation key */}
+                        <option value="width_mm">{unitSystem === 'metric' ? t.widthMm : t.widthInches}</option>   {/* Updated to use translation key */}
+                        <option value="height_mm">{unitSystem === 'metric' ? t.heightMm : t.heightInches}</option> {/* Updated to use translation key */}
                     </select>
                 </div>
             </div>
@@ -122,4 +123,4 @@ const BarChartSection = ({
     );
 };
 
-export default BarChartSection
+export default BarChartSection;

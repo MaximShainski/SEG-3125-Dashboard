@@ -1,3 +1,5 @@
+import React from 'react';
+
 const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, t, convertValue }) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
@@ -17,9 +19,12 @@ const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, 
             metricKey = 'efficiency_wh_per_km';
         }
 
-        if (!isScatterPlotTooltip && typeof convertValue === 'function') {
-            displayedValue = convertValue(metricKey, displayedValue);
-        }
+        // IMPORTANT FIX: Remove redundant conversion for bar chart tooltip.
+        // The 'displayedValue' (payload[0].value) from the bar chart's data is already converted
+        // by the aggregateDataByBrand function in BarChartSection.
+        // No conversion needed here for bar chart data.
+        // For scatter plot, data values are raw, so conversion is handled below where needed.
+
 
         // Determine the unit based on the metricKey
         switch (metricKey) {
@@ -30,16 +35,16 @@ const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, 
                 unit = unitSystem === 'metric' ? ' km/h' : ' mph';
                 break;
             case 'acceleration_0_100_s':
-                unit = unitSystem === 'metric' ? ' s' : ' s (0-60 mph)';
+                unit = unitSystem === 'metric' ? ' s' : ' s (0-60 mph)'; // Updated unit for acceleration
                 break;
             case 'battery_capacity_kWh':
                 unit = ' kWh';
                 break;
             case 'efficiency_wh_per_km':
-                unit = unitSystem === 'metric' ? ' Wh/km' : ' Wh/mile';
+                unit = unitSystem === 'metric' ? ' Wh/km' : ' Wh/mile'; // Updated unit for efficiency
                 break;
             case 'torque_nm':
-                unit = unitSystem === 'metric' ? ' Nm' : ' lb-ft';
+                unit = unitSystem === 'metric' ? ' Nm' : ' lb-ft'; // Updated unit for torque
                 break;
             case 'fast_charging_power_kw_dc':
                 unit = ' kW DC';
@@ -54,13 +59,16 @@ const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, 
                 unit = ''; // No unit for seats
                 break;
             case 'length_mm':
-                unit = unitSystem === 'metric' ? t.lengthMm.split('(')[1].replace(')', '') : t.lengthInches.split('(')[1].replace(')', '');
-                break;
             case 'width_mm':
-                unit = unitSystem === 'metric' ? t.widthMm.split('(')[1].replace(')', '') : t.widthInches.split('(')[1].replace(')', '');
-                break;
             case 'height_mm':
-                unit = unitSystem === 'metric' ? t.heightMm.split('(')[1].replace(')', '') : t.heightInches.split('(')[1].replace(')', '');
+                // Use the translated unit part directly from t.lengthInches, t.widthInches, t.heightInches
+                if (metricKey === 'length_mm') {
+                    unit = unitSystem === 'metric' ? t.lengthMm.split('(')[1].replace(')', '') : t.lengthInches.split('(')[1].replace(')', '');
+                } else if (metricKey === 'width_mm') {
+                    unit = unitSystem === 'metric' ? t.widthMm.split('(')[1].replace(')', '') : t.widthInches.split('(')[1].replace(')', '');
+                } else if (metricKey === 'height_mm') {
+                    unit = unitSystem === 'metric' ? t.heightMm.split('(')[1].replace(')', '') : t.heightInches.split('(')[1].replace(')', '');
+                }
                 break;
             default:
                 unit = '';
@@ -91,22 +99,22 @@ const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, 
                 translatedMetricNameForBarChart = t.fastChargingPowerKwDc;
                 break;
             case 'towing_capacity_kg':
-                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.towingCapacityKg : `${t.towingCapacityKg.replace('(kg)', '(lbs)')}`;
+                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.towingCapacityKg : t.towingCapacityKg.replace('(kg)', '(lbs)'); // Use translation key for lbs
                 break;
             case 'cargo_volume_l':
-                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.cargoVolumeL : `${t.cargoVolumeL.replace('(L)', '(cu ft)')}`;
+                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.cargoVolumeL : t.cargoVolumeL.replace('(L)', '(cu ft)'); // Use translation key for cu ft
                 break;
             case 'seats':
                 translatedMetricNameForBarChart = t.seats;
                 break;
             case 'length_mm':
-                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.lengthMm : t.lengthInches;
+                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.lengthMm : t.lengthInches; // Updated to use translation key
                 break;
             case 'width_mm':
-                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.widthMm : t.widthInches;
+                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.widthMm : t.widthInches;   // Updated to use translation key
                 break;
             case 'height_mm':
-                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.heightMm : t.heightInches;
+                translatedMetricNameForBarChart = unitSystem === 'metric' ? t.heightMm : t.heightInches; // Updated to use translation key
                 break;
             default:
                 translatedMetricNameForBarChart = '';
@@ -115,7 +123,8 @@ const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, 
 
         return (
             <div className="p-2 bg-white border border-gray-300 rounded-md shadow-lg text-sm">
-                {payload[0].dataKey === 'value' && (
+                {/* For Bar Chart Tooltip */}
+                {payload[0].dataKey === 'value' && ( // Check if it's the bar chart's data (dataKey 'value' is used for the bar height)
                     <>
                         <p className="font-bold">{data.name}</p> {/* Brand name from bar chart data */}
                         {/* Display the selected bar metric's average, using the correctly translated metric name */}
@@ -123,6 +132,7 @@ const CustomTooltip = ({ active, payload, label, selectedBarMetric, unitSystem, 
                     </>
                 )}
 
+                {/* For Scatter Plot Tooltip */}
                 {isScatterPlotTooltip && (
                     <>
                         <p className="font-bold">{data.brand} {data.model || label}</p>
