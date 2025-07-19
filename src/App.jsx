@@ -76,7 +76,7 @@ const App = () => {
         const fetchEVData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${import.meta.env.BASE_URL}ev_specs.csv`);
+                const response = await fetch('/ev_specs.csv');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
