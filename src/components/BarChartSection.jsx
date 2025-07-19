@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'; // Added useCallback
+import  { useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ALL_NUMERIC_METRICS} from '../constants';
 const BarChartSection = ({
@@ -78,9 +78,9 @@ const BarChartSection = ({
                         <option value="towing_capacity_kg">{unitSystem === 'metric' ? t.towingCapacityKg : `${t.towingCapacityKg.replace('(kg)', '(lbs)')}`}</option>
                         <option value="cargo_volume_l">{unitSystem === 'metric' ? t.cargoVolumeL : `${t.cargoVolumeL.replace('(L)', '(cu ft)')}`}</option>
                         <option value="seats">{t.seats}</option>
-                        <option value="length_mm">{unitSystem === 'metric' ? t.lengthMm : `${t.lengthMm.replace('(mm)', '(inches)')}`}</option>
-                        <option value="width_mm">{unitSystem === 'metric' ? t.widthMm : `${t.widthMm.replace('(mm)', '(inches)')}`}</option>
-                        <option value="height_mm">{unitSystem === 'metric' ? t.heightMm : `${t.heightMm.replace('(mm)', '(inches)')}`}</option>
+                        <option value="length_mm">{unitSystem === 'metric' ? t.lengthMm : t.lengthInches}</option>
+                        <option value="width_mm">{unitSystem === 'metric' ? t.widthMm : t.widthInches}</option>
+                        <option value="height_mm">{unitSystem === 'metric' ? t.heightMm : t.heightInches}</option>
                     </select>
                 </div>
             </div>

@@ -1,13 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-    LineChart, Line, ScatterChart, Scatter // Added ScatterChart and Scatter
-} from 'recharts';
+import { useState, useEffect, useCallback } from 'react';
 
 import ScatterPlotSection from './components/ScatterPlotSection';
 import CustomTooltip from './components/CustomTooltip';
 import LanguageAndUnitSelectors from './components/LanguageAndUnitSelectors';
-import LineChartSection from './components/LineChartSection';
 import BarChartSection from './components/BarChartSection';
 import {translations, KM_TO_MILES, KMH_TO_MPH, KG_TO_LBS, L_TO_CU_FT, MM_TO_INCH, NM_TO_LB_FT, ACCEL_100KMH_TO_60MPH_FACTOR, WH_PER_KM_TO_WH_PER_MILE} from './constants';
 

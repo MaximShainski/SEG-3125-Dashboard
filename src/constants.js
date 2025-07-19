@@ -11,12 +11,12 @@ export const translations = {
         topSpeedKmH: "Top Speed (km/h)",
         topSpeedMph: "Top Speed (mph)",
         accelerationS: "Acceleration (0-100 km/h in s)",
-        accelerationMph: "Acceleration (0-60 mph in s)", // Added imperial acceleration label
+        accelerationMph: "Acceleration (0-60 mph in s)",
         batteryCapacityKWh: "Battery Capacity (kWh)",
         efficiencyWhPerKm: "Efficiency (Wh/km)",
-        efficiencyWhPerMile: "Efficiency (Wh/mile)", // Added imperial efficiency label
+        efficiencyWhPerMile: "Efficiency (Wh/mile)",
         torqueNm: "Torque (Nm)",
-        torqueLbFt: "Torque (lb-ft)", // Added imperial torque label
+        torqueLbFt: "Torque (lb-ft)",
         fastChargingPowerKwDc: "Fast Charging Power (kW DC)",
         towingCapacityKg: "Towing Capacity (kg)",
         cargoVolumeL: "Cargo Volume (L)",
@@ -24,6 +24,9 @@ export const translations = {
         lengthMm: "Length (mm)",
         widthMm: "Width (mm)",
         heightMm: "Height (mm)",
+        lengthInches: "Length (inches)",
+        widthInches: "Width (inches)",
+        heightInches: "Height (inches)",
         selectUnit: "Select Unit System",
         metric: "Metric",
         imperial: "Imperial",
@@ -64,12 +67,12 @@ export const translations = {
         topSpeedKmH: "Vitesse Max (km/h)",
         topSpeedMph: "Vitesse Max (mph)",
         accelerationS: "Accélération (0-100 km/h en s)",
-        accelerationMph: "Accélération (0-60 mph en s)", // French imperial acceleration label
+        accelerationMph: "Accélération (0-60 mph en s)",
         batteryCapacityKWh: "Capacité Batterie (kWh)",
         efficiencyWhPerKm: "Efficacité (Wh/km)",
-        efficiencyWhPerMile: "Efficacité (Wh/mile)", // French imperial efficiency label
+        efficiencyWhPerMile: "Efficacité (Wh/mile)",
         torqueNm: "Couple (Nm)",
-        torqueLbFt: "Couple (lb-ft)", // French imperial torque label
+        torqueLbFt: "Couple (lb-ft)",
         fastChargingPowerKwDc: "Puissance Charge Rapide (kW CC)",
         towingCapacityKg: "Capacité Remorquage (kg)",
         cargoVolumeL: "Volume Coffre (L)",
@@ -77,6 +80,9 @@ export const translations = {
         lengthMm: "Longueur (mm)",
         widthMm: "Largeur (mm)",
         heightMm: "Hauteur (mm)",
+        lengthInches: "Longueur (pouces)",
+        widthInches: "Largeur (pouces)",
+        heightInches: "Hauteur (pouces)",
         selectUnit: "Sélectionner le système d'unités",
         metric: "Métrique",
         imperial: "Impérial",
